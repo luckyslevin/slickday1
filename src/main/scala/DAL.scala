@@ -2,7 +2,7 @@ import java.util.UUID
 
 import slick.jdbc.JdbcProfile
 class DAL(val profile: JdbcProfile)
-  extends AccountRepo with ProfileRepo {
+  extends AccountRepo with ProfileRepo with ProfileComponent {
   import profile.api._
 
   def createTable =

@@ -1,6 +1,6 @@
 import java.util.UUID
 
-trait ProfileRepo extends AccountRepo { this: AccountRepo with ProfileComponent =>
+trait ProfileRepo { this: AccountRepo with ProfileComponent =>
   import profile.api._
   private val accountsTable = accounts
   final class Profiles(tag: Tag) extends Table[Profile](tag, "PROFILES") {
