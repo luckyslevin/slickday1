@@ -9,5 +9,9 @@ trait AccountRepo { this: ProfileComponent =>
     def * = (id, email).mapTo[Account]
   }
 
-  object accounts extends TableQuery(new Accounts(_))
+  object accounts extends TableQuery(new Accounts(_)) {
+    @inline def create(account: Account) = this += account
+    @inline def find(id: UUID) = this.filter(_.id === id).result.headOption
+    @inline def get(email: String) = this.filter(_.email like s"%$email%").result
+  }
 }

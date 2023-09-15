@@ -12,5 +12,17 @@ trait ProfileRepo { this: AccountRepo with ProfileComponent =>
     def * = (accountId, firstName, lastName, gender).mapTo[Profile]
   }
 
-  object profiles extends TableQuery(new Profiles(_))
+  object profiles extends TableQuery(new Profiles(_)) {
+    @inline def create(profile: Profile) = this += profile
+    @inline def find(accountId: UUID) = this.filter(_.accountId === accountId).result.headOption
+    @inline def get(gender: Char) = this.filter(_.gender === gender).result
+    @inline def get(email: String) = for {
+      profile <- this
+      account <- accounts if account.email === email
+    } yield profile
+    @inline def withAccounts = (for {
+      profile <- profiles
+      account <- profile.accounts
+    } yield (account, profile)).result
+  }
 }
