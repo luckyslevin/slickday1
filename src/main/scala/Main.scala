@@ -5,10 +5,11 @@ import scala.util.Success
 
 import slick.jdbc.H2Profile
 import slick.jdbc.H2Profile.api._
-import slick.jdbc.JdbcBackend.Database
+import slick.jdbc.JdbcProfile
 
 object Main extends App {
-  def run(dal: DAL, db: Database) = {
+  def run(dal: DAL with ProfileComponent) = {
+    val db = dal.db
     println("Running test against " + dal.profile)
     val dbio = for {
       _ <- db.run(dal.createTable)
@@ -42,7 +43,11 @@ object Main extends App {
     }
     dbio
   }
-  run(new DAL(H2Profile), Database.forConfig("user-db_conf")).onComplete {
+
+  run(new DAL with ProfileComponent {
+    override val profile: JdbcProfile = H2Profile
+    override val db = Database.forConfig("user-db_conf")
+  }).onComplete {
     case Success(value)     =>
     case Failure(exception) => println(exception)
   }

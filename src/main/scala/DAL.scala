@@ -1,13 +1,11 @@
 import java.util.UUID
 
-import slick.jdbc.JdbcProfile
-class DAL(val profile: JdbcProfile)
-  extends AccountRepo with ProfileRepo with ProfileComponent {
+import slick.jdbc.{ JdbcBackend, JdbcProfile }
+abstract class DAL
+  extends AccountRepo with ProfileRepo { this: ProfileComponent =>
   import profile.api._
-
   def createTable =
     (accounts.schema ++ profiles.schema).createIfNotExists
-
   def createAccount(account: Account) = accounts.create(account)
   def createProfile(profile: Profile) = profiles.create(profile)
   def findAccount(id: UUID) = accounts.find(id)
