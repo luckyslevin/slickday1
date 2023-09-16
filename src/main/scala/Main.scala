@@ -8,6 +8,7 @@ import slick.jdbc.H2Profile.api._
 import slick.jdbc.JdbcProfile
 
 object Main extends App {
+
   def run(dal: DAL with ProfileComponent) = {
     val db = dal.db
     println("Running test against " + dal.profile)
@@ -15,9 +16,15 @@ object Main extends App {
     val dbio = for {
       _ <- dal.createTable
       val account = Account("Account@gmail.com")
-      val profile = Profile(account.id, Some("firstName"), Some("lastName"), '♀')
+      val profile =
+        Profile(account.id, Some("firstName"), Some("lastName"), '♀')
       _ <- dal.createAccount(account)
-      _ <- dal.createProfile(Profile(account.id, Some("firstName"), Some("lastName"), '♀'))
+      _ <- dal.createProfile(Profile(
+        account.id,
+        Some("firstName"),
+        Some("lastName"),
+        '♀'
+      ))
       accountOpt <- dal.findAccount(account.id)
       profileOpt <- dal.findProfile(account.id)
       genders <- dal.getProfileByGender(profile.gender)
@@ -28,14 +35,14 @@ object Main extends App {
     } yield (accountOpt, profileOpt, genders, accountWithProfiles, profileByEmail, accountsByEmail, `firstName&LastName`)
     db.run(dbio).map {
       case (
-            accountOpt,
-            profileOpt,
-            genders,
-            accountWithProfiles,
-            profileByEmail,
-            accountsByEmail,
-            firstLastName
-          ) =>
+        accountOpt,
+        profileOpt,
+        genders,
+        accountWithProfiles,
+        profileByEmail,
+        accountsByEmail,
+        firstLastName
+      ) =>
         println("=" * 190)
         println("Find account: ", accountOpt)
         println("=" * 190)
@@ -60,4 +67,5 @@ object Main extends App {
     case Success(value)     =>
     case Failure(exception) => println(exception)
   }
+
 }
