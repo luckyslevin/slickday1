@@ -1,5 +1,6 @@
+import java.util.concurrent.Executors
+
 import scala.concurrent._
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Failure
 import scala.util.Success
 
@@ -8,16 +9,15 @@ import slick.jdbc.H2Profile.api._
 import slick.jdbc.JdbcProfile
 
 object Main extends App {
-
+  implicit val executor: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(5))
+  val account = Account("Account@gmail.com")
+  val profile =
+    Profile(account.id, Some("firstName"), Some("lastName"), '♀')
   def run(dal: DAL with ProfileComponent) = {
     val db = dal.db
     println("Running test against " + dal.profile)
-
     val dbio = for {
       _ <- dal.createTable
-      val account = Account("Account@gmail.com")
-      val profile =
-        Profile(account.id, Some("firstName"), Some("lastName"), '♀')
       _ <- dal.createAccount(account)
       _ <- dal.createProfile(Profile(
         account.id,
@@ -43,6 +43,7 @@ object Main extends App {
         accountsByEmail,
         firstLastName
       ) =>
+        println(Thread.currentThread().getName())
         println("=" * 190)
         println("Find account: ", accountOpt)
         println("=" * 190)
@@ -64,8 +65,18 @@ object Main extends App {
     override val profile: JdbcProfile = H2Profile
     override val db = Database.forConfig("user-db_conf")
   }).onComplete {
-    case Success(value)     =>
+    case Success(value) => aaa(effect.accountService)
     case Failure(exception) => println(exception)
+  }
+
+  def aaa(services: effect.Services) {
+    val db = services.db
+    db.run(services.service.find(account.id)).map { a =>
+      println(account.id, a, "=" * 30)
+    }.onComplete {
+      case Success(value) =>
+      case Failure(exception) => println(exception)
+    }
   }
 
 }

@@ -4,6 +4,7 @@ import slick.jdbc.{ JdbcBackend, JdbcProfile }
 abstract class DAL
   extends AccountRepo with ProfileRepo { this: ProfileComponent =>
   import profile.api._
+
   def createTable =
     (accounts.schema ++ profiles.schema).createIfNotExists
   def createAccount(account: Account) = accounts.create(account)
@@ -18,7 +19,8 @@ abstract class DAL
 
   def getAccountsByEmail(email: String) = accounts.get(email)
 
-  def `findFirstName&AndLastName`(email: String) = profiles.get(email).map(r => (r.firstName, r.lastName)).result.headOption
+  def `findFirstName&AndLastName`(email: String) =
+    profiles.get(email).map(r => (r.firstName, r.lastName)).result.headOption
 
   def getAccountProfiles = profiles.withAccounts
 }
