@@ -15,10 +15,11 @@ trait ProfileRepo { this: AccountRepo with ProfileComponent =>
   object profiles extends TableQuery(new Profiles(_)) {
     @inline def create(profile: Profile) = this += profile
     @inline def find(accountId: UUID) = this.filter(_.accountId === accountId).result.headOption
+    @inline def find(email: String) = get(email).result.headOption
     @inline def get(gender: Char) = this.filter(_.gender === gender).result
     @inline def get(email: String) = for {
       profile <- this
-      account <- accounts if account.email === email
+      account <- accounts if account.email === email && account.id === profile.accountId
     } yield profile
     @inline def withAccounts = (for {
       profile <- profiles

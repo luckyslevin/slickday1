@@ -12,10 +12,7 @@ abstract class DAL
   def findAccount(id: UUID) = accounts.find(id)
   def findProfile(accountId: UUID) = profiles.find(accountId)
   def getProfileByGender(gender: Char) = profiles.get(gender)
-  def findProfileByEmail(email: String) = for {
-    profile <- profiles
-    account <- accounts if account.email === email
-  } yield profile
+  def findProfileByEmail(email: String) = profiles.find(email)
 
   def getAccountsByEmail(email: String) = accounts.get(email)
 
