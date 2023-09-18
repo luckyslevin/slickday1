@@ -11,7 +11,7 @@ import slick.jdbc.JdbcProfile
 object Main extends App {
   implicit val executor: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(5))
 
-  def run(dal: DAL with ProfileComponent) = {
+  def run(dal: DAL with ProfileContext with DatabaseContext) = {
     val db = dal.db
     println("Running test against " + dal.profile)
     val account = Account("Account@gmail.com")
@@ -57,7 +57,7 @@ object Main extends App {
     }
   }
 
-  run(new DAL with ProfileComponent {
+  run(new DAL with ProfileContext with DatabaseContext {
     override val profile: JdbcProfile = H2Profile
     override val db = Database.forConfig("user-db_conf")
   }).onComplete {

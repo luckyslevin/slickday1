@@ -15,16 +15,15 @@ object services {
       def find(id: UUID): DBIO[Option[Account]]
       def get(email: String): DBIO[Seq[Account]]
     }
-    trait LiveService extends Service { this: ProfileComponent with AccountRepo =>
+    trait LiveService extends Service { this: ProfileContext with AccountRepo =>
       def create(account: Account): DBIO[Int] = accounts.create(account)
       def find(id: UUID): DBIO[Option[Account]] = accounts.find(id)
 
       def get(email: String): DBIO[Seq[Account]] = accounts.get(email)
     }
-    trait Live extends AccountService { self: ProfileComponent =>
-      override final lazy val accountService = new LiveService with AccountRepo with ProfileComponent {
+    trait Live extends AccountService { self: ProfileContext =>
+      override final lazy val accountService = new LiveService with AccountRepo with ProfileContext {
         override val profile: JdbcProfile = self.profile
-        override val db: JdbcBackend#DatabaseDef = self.db
       }
     }
   }
@@ -44,7 +43,7 @@ object services {
       def get(char: Char): DBIO[Seq[Profile]]
       def getAccountProfiles: DBIO[Seq[(Account, Profile)]]
     }
-    trait LiveService extends Service { this: ProfileComponent with AccountRepo with ProfileRepo =>
+    trait LiveService extends Service { this: ProfileContext with AccountRepo with ProfileRepo =>
       import profile.api._
       def create(profile: Profile): DBIO[Int] = profiles.create(profile)
       def find(id: UUID): DBIO[Option[Profile]] = profiles.find(id)
@@ -55,10 +54,9 @@ object services {
       def getAccountProfiles: DBIO[Seq[(Account, Profile)]] = profiles.withAccounts
 
     }
-    trait Live extends ProfileService { self: ProfileComponent =>
-      override lazy val profileService = new LiveService with AccountRepo with ProfileRepo with ProfileComponent {
+    trait Live extends ProfileService { self: ProfileContext =>
+      override lazy val profileService = new LiveService with AccountRepo with ProfileRepo with ProfileContext {
         override val profile: JdbcProfile = self.profile
-        override val db: JdbcBackend#DatabaseDef = self.db
       }
     }
   }
@@ -66,8 +64,8 @@ object services {
 
 object Boundary {
   import services._
-  type Services = AccountService with ProfileService with ProfileComponent
-  object Make extends AccountService.Live with ProfileService.Live with ProfileComponent {
+  type Services = AccountService with ProfileService with ProfileContext with DatabaseContext
+  object Make extends AccountService.Live with ProfileService.Live with ProfileContext with DatabaseContext {
 
     override val profile = H2Profile
     import profile.api._
